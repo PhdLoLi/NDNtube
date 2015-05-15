@@ -7,6 +7,8 @@ For license information see LICENSE.
 
 http://named-data.net/
 
+IMPORTANT: This project is still under development, there may exist bugs and other related issues. 
+
 Description
 ----
 
