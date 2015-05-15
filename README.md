@@ -32,8 +32,6 @@ The directory structure is as follows:
     * **repo-ng.config** *-- repo-ng config file, the default path is "/usr/local/etc/ndn/"*
     * **config.ini** *-- config file of this project*
     * **.waf-tools/** *-- additional waf tools*
-    * **examples/** *-- no use now*
-    * **tests/** *-- no use now*
     * **LICENSE**
     * **README.md**
     * **INSTALL.md** 
