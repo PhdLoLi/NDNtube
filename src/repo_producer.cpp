@@ -61,14 +61,14 @@ namespace ndn {
     try {
       
       boost::property_tree::ptree pt;
-      boost::property_tree::ini_parser::read_ini("../config.ini", pt);
-      std::cout << "Video FilePath: " << pt.get<std::string>("video.path") << std::endl;
-      std::cout << "Video Prefix: " << pt.get<std::string>("video.prefix") << std::endl; 
+      boost::property_tree::ini_parser::read_ini("config.ini", pt);
+      std::cout << "Video FilePath: " << pt.get<std::string>("ndntube.path") << std::endl;
+      std::cout << "Video Prefix: " << pt.get<std::string>("ndntube.prefix") << std::endl; 
 
-      std::string prefix = pt.get<std::string>("video.prefix");;
+      std::string prefix = pt.get<std::string>("ndntube.prefix");;
       VideoGenerator generator;
 
-      std::string filepath = pt.get<std::string>("video.path");
+      std::string filepath = pt.get<std::string>("ndntube.path");
       std::string videoFilename;
       std::string filelist;
       std::vector<std::string> filediff;

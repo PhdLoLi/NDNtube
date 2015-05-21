@@ -48,9 +48,9 @@ namespace ndn {
   
 
       boost::property_tree::ptree pt;
-      boost::property_tree::ini_parser::read_ini("../config.ini", pt);
+      boost::property_tree::ini_parser::read_ini("config.ini", pt);
 
-  		std::string prefix = pt.get<std::string>("video.prefix");
+  		std::string prefix = pt.get<std::string>("ndntube.prefix");
       std::string filename ="";
 
       Name listName(Name(prefix).append("playlist"));

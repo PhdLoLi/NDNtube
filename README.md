@@ -52,20 +52,21 @@ Config
 Run
 --
 Please keep NFD and Repo-ng Running.
+Please run these binary files on the toppest path of the project (the same path with config.ini).
 
 - Terminal 1 for repo\_producer -- Firstly, Publishing video & audio to Repo-ng
 <pre>
-$ .build/repo_producer
+$ build/repo_producer
 </pre>
 
 - Terminal 2 for list\_producer -- Secondely, Publishing playing list
 <pre>
-$ .build/producer
+$ build/producer
 </pre>
 
 - Terminal 3 -- Playing video & audio
 <pre>
-$ .build/consumer
+$ build/consumer
 </pre>
 
 License
