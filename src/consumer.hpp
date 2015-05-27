@@ -99,6 +99,7 @@ namespace ndn{
 //    sampleConsumer->setContextOption(DATA_TO_VERIFY,
 //                    (DataVerificationCallback)bind(&Verificator::onPacket, verificator, _1));
 //    sampleConsumer->setContextOption(MIN_WINDOW_SIZE, 1);
+//    sampleConsumer->setContextOption(MAX_WINDOW_SIZE, 10);
     sampleConsumer->setContextOption(INTEREST_LEAVE_CNTX, 
                               (ConsumerInterestCallback)bind(&ConsumerCallback::processLeavingInterest, con->cb, _1, _2));
     sampleConsumer->setContextOption(INTEREST_RETRANSMIT, 

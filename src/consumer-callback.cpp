@@ -118,6 +118,7 @@ namespace ndn {
   ConsumerCallback::processData(Consumer& con, const Data& data)
   {
     interest_r++;
+    printf("DATA IN CNTX Name: %s  FinalBlockId: %s\n", data.getName().toUri().c_str(), data.getFinalBlockId().toUri().c_str());
 //    std::cout << "DATA IN CNTX Name: " << data.getName() << "  FinalBlockId: " <<data.getFinalBlockId() << std::endl;
   }
   
@@ -160,6 +161,7 @@ namespace ndn {
   ConsumerCallback::onRetx(Consumer& con, Interest& interest)
   {
     interest_retx ++;
+    printf("Retransmitted %s\n", interest.getName().toUri().c_str());
 //    std::cout << "Retransmitted " << interest.getName() << std::endl;
   }
 
@@ -167,6 +169,7 @@ namespace ndn {
   ConsumerCallback::onExpr(Consumer& con, Interest& interest)
   {
     interest_expr ++;
+    printf("Expired %s\n", interest.getName().toUri().c_str());
 //    std::cout << "Expired " << interest.getName() << std::endl;
   }
 
