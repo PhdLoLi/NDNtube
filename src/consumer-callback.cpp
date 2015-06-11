@@ -33,6 +33,8 @@ namespace ndn {
     interest_r = 0;
     interest_retx = 0;
     interest_expr = 0;
+    frame_cnt_v = 0;
+    frame_cnt_a = 0;
 
 //    std::cout << "Construction" << std::endl;
 //    player.playbin_appsrc_init();
@@ -47,7 +49,8 @@ namespace ndn {
 //    std::cout << "@buffer " << &buffer <<std::endl;
     payload_v += bufferSize;
     player.h264_appsrc_data(buffer, bufferSize);
-    times_video ++;
+    frame_cnt_v++;
+//    times_video ++;
     boost::lock_guard<boost::mutex> lock(mut_payload_v);
     data_ready_payload_v = true;
     cond_payload_v.notify_all();
@@ -63,7 +66,8 @@ namespace ndn {
 //    std::cout << "@buffer " << &buffer <<std::endl;
     payload_a += bufferSize;
     player.h264_appsrc_data_audio(buffer, bufferSize);
-    times_audio ++;
+    frame_cnt_a++;
+//    times_audio ++;
     boost::lock_guard<boost::mutex> lock(mut_payload_a);
     data_ready_payload_a = true;
     cond_payload_a.notify_all();
@@ -86,7 +90,7 @@ namespace ndn {
     //  std::cout << "buffer " << buffer <<std::endl;
    //   std::cout << "streaminfo " << streaminfo <<std::endl;
     //  std::cout << "fileLength " << fileLength <<std::endl;
- //     std::cout << "processStreaminfo " << streaminfo << std::endl;
+      std::cout << "processStreaminfo " << streaminfo << std::endl;
       player.get_streaminfo(streaminfo);
     }else
     {
@@ -101,7 +105,7 @@ namespace ndn {
     Name suffix;
     con.getContextOption(SUFFIX, suffix);
     std::string suffix_str = suffix.get(0).toUri();
-//    std::cout << "suffix_str: " << suffix_str << std::endl;
+    std::cout << "suffix_str: " << suffix_str << std::endl;
     if(suffix_str == "pipeline")
     {
       std::string streaminfo((char*) buffer);
@@ -118,7 +122,7 @@ namespace ndn {
   ConsumerCallback::processData(Consumer& con, const Data& data)
   {
     interest_r++;
-    printf("DATA IN CNTX Name: %s  FinalBlockId: %s\n", data.getName().toUri().c_str(), data.getFinalBlockId().toUri().c_str());
+//    printf("DATA IN CNTX Name: %s  FinalBlockId: %s\n", data.getName().toUri().c_str(), data.getFinalBlockId().toUri().c_str());
 //    std::cout << "DATA IN CNTX Name: " << data.getName() << "  FinalBlockId: " <<data.getFinalBlockId() << std::endl;
   }
   

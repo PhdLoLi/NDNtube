@@ -9,6 +9,7 @@ def options(opt):
     opt.load('boost default-compiler-flags', tooldir=['.waf-tools'])
 
     opt.add_option('-l', '--log', dest="log", default='', help='log level', action='store')
+    opt.add_option('-t', '--test', action='store_true', default=False, dest='with_tests', help='''build unit tests''')
 
 def configure(conf):
     conf.load("compiler_c compiler_cxx gnu_dirs boost default-compiler-flags")
@@ -27,6 +28,10 @@ def configure(conf):
     USED_BOOST_LIBS = ['system', 'iostreams', 'filesystem', 'random']
 
     conf.check_boost(lib=USED_BOOST_LIBS, mandatory=True)
+
+    conf.env['WITH_TESTS'] = conf.options.with_tests
+
+    _enable_log(conf) 
 
 def build(bld):
 
@@ -47,6 +52,15 @@ def build(bld):
         source= "src/consumer.cpp src/video-player.cpp src/consumer-callback.cpp",
         use='GSTREAMER GSTREAMERAPP BOOST NDN_CXX PTHREAD',
         )
+
+    if bld.env['WITH_TESTS']:
+        for app in bld.path.ant_glob('test/*.cpp'):
+            bld(features=['cxx', 'cxxprogram'],
+                source = [app, 'src/consumer-callback.cpp', 'src/video-player.cpp'],
+                target = '%s' % (str(app.change_ext('','.cpp'))),
+                includes="src", 
+                use="GSTREAMER GSTREAMERAPP BOOST NDN_CXX PTHREAD",
+                ) 
 
 def _enable_log(conf):
     if Options.options.log == 'trace':

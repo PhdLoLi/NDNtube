@@ -24,6 +24,22 @@ namespace ndn {
     ConsumerCallback();
     
     void
+    processTestPayload(Consumer& con, const uint8_t* buffer, size_t bufferSize) 
+    {
+      payload_v += bufferSize;
+      frame_cnt_v++;
+      printf("Video Frame: %d\n", frame_cnt_v);
+    }
+
+    void 
+    processTestPayloadAudio(Consumer& con, const uint8_t* buffer, size_t bufferSize) 
+    {
+      payload_a += bufferSize;
+      frame_cnt_a++;
+      printf("Audio Frame: %d\n", frame_cnt_a);
+    }
+
+    void
     processPayload(Consumer& con, const uint8_t* buffer, size_t bufferSize);
     
     void
@@ -85,6 +101,8 @@ namespace ndn {
     int cur_frame_a;
     int finalframe_video;
     int finalframe_audio;
+    int frame_cnt_v;
+    int frame_cnt_a;
     gsize payload_v;
     gsize payload_a;
     gsize interest_s;
