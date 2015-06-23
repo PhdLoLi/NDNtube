@@ -35,6 +35,8 @@ namespace ndn {
     interest_expr = 0;
     frame_cnt_v = 0;
     frame_cnt_a = 0;
+    frame_rate_v = 7;
+    frame_rate_a = 6;
 
 //    std::cout << "Construction" << std::endl;
 //    player.playbin_appsrc_init();
@@ -44,16 +46,27 @@ namespace ndn {
   void
   ConsumerCallback::processPayload(Consumer& con, const uint8_t* buffer, size_t bufferSize)
   {
-//    std::cout << "video times processPayload " << std::dec << times_video <<std::endl;
-//    std::cout << "video bufferSize " << bufferSize <<std::endl;
-//    std::cout << "@buffer " << &buffer <<std::endl;
-    payload_v += bufferSize;
-    player.h264_appsrc_data(buffer, bufferSize);
-    frame_cnt_v++;
-//    times_video ++;
-    boost::lock_guard<boost::mutex> lock(mut_payload_v);
-    data_ready_payload_v = true;
-    cond_payload_v.notify_all();
+      frame_cnt_v_m.lock();
+
+      Name suffix;
+      con.getContextOption(SUFFIX, suffix);
+      int frameNumber = std::stoi(suffix.get(0).toUri());
+//      printf("Video Frame Counter: %d suffix: %s frameNumber: %d\n", frame_cnt_v, suffix.toUri().c_str(), frameNumber);
+      payload_v += bufferSize;
+      frame_cnt_v++;
+
+      if (buffer == NULL) 
+        printf("NONONO buffer == NULL\n");
+      if (bufferSize == 0)
+        printf("NONONO buffersize == 0\n");
+
+      if (buffer != NULL && bufferSize > 0) {
+        uint8_t* bufferTmp = new uint8_t[bufferSize];
+        memcpy(bufferTmp, buffer, bufferSize);
+        buffers_v[frameNumber % frame_rate_v].length = bufferSize;
+        buffers_v[frameNumber % frame_rate_v].data = bufferTmp;
+      }
+      frame_cnt_v_m.unlock();
 //    data_ready_payload_v = false;
 //    std::cout << "processPayload video over " << std::endl;
   }
@@ -61,18 +74,29 @@ namespace ndn {
   void
   ConsumerCallback::processPayloadAudio(Consumer& con, const uint8_t* buffer, size_t bufferSize)
   {
-//    std::cout << "audio times processPayload " << std::dec << times_audio <<std::endl;
-//    std::cout << "audio bufferSize " << bufferSize <<std::endl;
-//    std::cout << "@buffer " << &buffer <<std::endl;
-    payload_a += bufferSize;
-    player.h264_appsrc_data_audio(buffer, bufferSize);
-    frame_cnt_a++;
-//    times_audio ++;
-    boost::lock_guard<boost::mutex> lock(mut_payload_a);
-    data_ready_payload_a = true;
-    cond_payload_a.notify_all();
-//    data_ready_payload_a = false;
-//    std::cout << "processPayload audio over " << std::endl;
+
+      frame_cnt_a_m.lock();
+
+      Name suffix;
+      con.getContextOption(SUFFIX, suffix);
+      int frameNumber = std::stoi(suffix.get(0).toUri());
+//      printf("Audio Frame Counter: %d suffix: %s frameNumber: %d\n", frame_cnt_a, suffix.toUri().c_str(), frameNumber);
+      payload_a += bufferSize;
+      frame_cnt_a++;
+
+      if (buffer == NULL) 
+        printf("NONONO buffer == NULL\n");
+      if (bufferSize == 0)
+        printf("NONONO buffersize == 0\n");
+
+      if (buffer != NULL && bufferSize > 0) {
+        uint8_t* bufferTmp = new uint8_t[bufferSize];
+        memcpy(bufferTmp, buffer, bufferSize);
+        buffers_a[frameNumber % frame_rate_a].length = bufferSize;
+        buffers_a[frameNumber % frame_rate_a].data = bufferTmp;
+      }
+
+      frame_cnt_a_m.unlock();
   }
   
   void
@@ -85,11 +109,7 @@ namespace ndn {
     if(suffix_str == "pipeline")
     {
       std::string streaminfo((char*) buffer);
-    //  long fileLength = std::stol(content);
-    //  std::cout << "bufferSize " << bufferSize <<std::endl;
-    //  std::cout << "buffer " << buffer <<std::endl;
-   //   std::cout << "streaminfo " << streaminfo <<std::endl;
-    //  std::cout << "fileLength " << fileLength <<std::endl;
+
       std::cout << "processStreaminfo " << streaminfo << std::endl;
       player.get_streaminfo(streaminfo);
     }else
@@ -105,11 +125,11 @@ namespace ndn {
     Name suffix;
     con.getContextOption(SUFFIX, suffix);
     std::string suffix_str = suffix.get(0).toUri();
-    std::cout << "suffix_str: " << suffix_str << std::endl;
+//    std::cout << "suffix_str: " << suffix_str << std::endl;
     if(suffix_str == "pipeline")
     {
       std::string streaminfo((char*) buffer);
-//      std::cout << "processStreaminfo_audio " << streaminfo << std::endl;
+      std::cout << "processStreaminfo_audio " << streaminfo << std::endl;
       player.get_streaminfo_audio(streaminfo);
     }else
     {
@@ -121,7 +141,10 @@ namespace ndn {
   void
   ConsumerCallback::processData(Consumer& con, const Data& data)
   {
+//    boost::lock_guard<boost::mutex> lock(interest_r_m);
+    interest_r_m.lock();
     interest_r++;
+    interest_r_m.unlock();
 //    printf("DATA IN CNTX Name: %s  FinalBlockId: %s\n", data.getName().toUri().c_str(), data.getFinalBlockId().toUri().c_str());
 //    std::cout << "DATA IN CNTX Name: " << data.getName() << "  FinalBlockId: " <<data.getFinalBlockId() << std::endl;
   }
@@ -139,7 +162,10 @@ namespace ndn {
   void
   ConsumerCallback::processLeavingInterest(Consumer& con, Interest& interest)
   {
+//    boost::lock_guard<boost::mutex> lock(interest_s_m);
+    interest_s_m.lock();
     interest_s ++;
+    interest_s_m.unlock();
 //    std::cout << "LEAVES " << interest.toUri() << std::endl;
 //    std::cout << "LEAVES name " << interest.getName() << std::endl;
   }  
@@ -164,17 +190,21 @@ namespace ndn {
   void
   ConsumerCallback::onRetx(Consumer& con, Interest& interest)
   {
+//    boost::lock_guard<boost::mutex> lock(interest_retx_m);
+    interest_retx_m.lock();
     interest_retx ++;
+    interest_retx_m.unlock();
     printf("Retransmitted %s\n", interest.getName().toUri().c_str());
-//    std::cout << "Retransmitted " << interest.getName() << std::endl;
   }
 
   void
   ConsumerCallback::onExpr(Consumer& con, Interest& interest)
   {
+//    boost::lock_guard<boost::mutex> lock(interest_expr_m);
+    interest_expr_m.lock();
     interest_expr ++;
+    interest_expr_m.unlock();
     printf("Expired %s\n", interest.getName().toUri().c_str());
-//    std::cout << "Expired " << interest.getName() << std::endl;
   }
 
 } // namespace ndn

@@ -37,25 +37,25 @@ namespace ndn {
   void
   ProducerCallback::processInterest(Producer& pro, const Interest& interest)
   {
-    //if (interet.getName().get(-2).toSegment() < m_crrnFrameNumer)
-    
-    int sampleNumber =  std::stoi(interest.getName().get(-2).toUri());
-//    std::cout << "Current Number" << std::dec << *m_curnum << std::endl;
-    if (sampleNumber > *m_curnum)
-    {
-      std::cout << "My NACK!!!!!!" << std::endl;
-      ApplicationNack appNack(interest, ApplicationNack::PRODUCER_DELAY);
-      appNack.setDelay(5000); // in ms
-      m_producer->nack(appNack);
-    }
-//    std::cout << "NO HIT Interest!" << interest.getName().toUri() << std::endl;
-//    std::cout << "HAHA " <<std::dec<< sampleNumber << std::endl;
+//    //if (interet.getName().get(-2).toSegment() < m_crrnFrameNumer)
+//    
+//    int sampleNumber =  std::stoi(interest.getName().get(-2).toUri());
+////    std::cout << "Current Number" << std::dec << *m_curnum << std::endl;
+//    if (sampleNumber > *m_curnum)
+//    {
+//      std::cout << "My NACK!!!!!!" << std::endl;
+//      ApplicationNack appNack(interest, ApplicationNack::PRODUCER_DELAY);
+//      appNack.setDelay(5000); // in ms
+//      m_producer->nack(appNack);
+//    }
+////    std::cout << "NO HIT Interest!" << interest.getName().toUri() << std::endl;
+////    std::cout << "HAHA " <<std::dec<< sampleNumber << std::endl;
   }
   
   void
   ProducerCallback::processIncomingInterest(Producer& pro, const Interest& interest)
   {
-    std::cout << "process Incoming Interest " << interest.getName() << std::endl;
+//    std::cout << "process Incoming Interest " << interest.getName() << std::endl;
   }
   
   bool

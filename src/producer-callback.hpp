@@ -33,12 +33,11 @@ namespace ndn {
     processOutgoingData(Producer& pro, const Data& data)
     {
       count ++;
-//      Name suffix;
-//      pro.getContextOption(SUFFIX, suffix);
-//      std::string suffix_str = suffix.toUri();
-//      std::cout << "frame number: " << suffix_str << "total number: " << count << std::endl; 
-      std::cout << "OutgoingData " << data.getName() << std::endl;
-      std::cout << "total number: " << std::dec << count << std::endl; 
+      std::cout << "Callback total number: " << std::dec << count << std::endl; 
+      std::cout << "Callback OutgoingData " << data.getName() << std::endl;
+      std::cout << "Callback Payload Size " <<data.getContent().size() << std::endl; 
+      std::cout << "Callback WholeData Size " <<data.wireEncode().size() << std::endl; 
+      std::cout << "--- Segment " << count  << " Over--- " << std::endl; 
       //Send data
 //      boost::system::error_code ec;
 //      socket->write_some(boost::asio::buffer(data.wireEncode().wire(), data.wireEncode().size()), ec);

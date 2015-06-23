@@ -7,14 +7,34 @@
 
 #include "video-player.hpp"
 
-
 namespace ndn {
 
   int t_video = 0;
   int t_audio = 0;
 
-  VideoPlayer::VideoPlayer()
+
+  VideoPlayer::VideoPlayer() : rate_ready(false)//, pipeline_pool(1)
   {
+  }
+
+  VideoPlayer::~VideoPlayer() 
+  {
+    pipe_thread->join();
+  }
+  int 
+  VideoPlayer::get_video_rate()
+  {
+    VideoAudio *va = &s_va;
+    App *video = &(va->v_app);
+    return video->rate;
+  }
+
+  int 
+  VideoPlayer::get_audio_rate()
+  {
+    VideoAudio *va = &s_va;
+    App *audio = &(va->a_app);
+    return audio->rate;
   }
 
   void
@@ -46,50 +66,49 @@ namespace ndn {
 //    rc = pthread_create(&thread, NULL, h264_audio_thread ,(void *)app);
 //    std::cout << "h264_audio_thread OK! " << std::endl;
     h264_appsrc_init();
+//    std::cout << "get streaminfo audio over" << std::endl;
   }
 
   void
   VideoPlayer::h264_appsrc_data(const uint8_t* buffer, size_t bufferSize )
   {
-    VideoAudio *va = &s_va;
-    App *app = &(va->v_app);
-    /* get some vitals, this will be used to read data from the mmapped file and
-     * feed it to appsrc. */
-    DataNode dataNode;
-    uint8_t* bufferTmp = new uint8_t[bufferSize];
-    memcpy (bufferTmp, buffer, bufferSize);
-    dataNode.length = bufferSize;
-    dataNode.data = (guint8 *) bufferTmp;
-    (app->dataQue).push_back(dataNode);
-//    std::cout << "videoQueueSize " << (app->dataQue).size() <<std::endl;
-    t_video ++;
-//    pthread_mutex_lock(&(app->count_mutex));
-//    if((app->dataQue).size() > 0)
-//       pthread_cond_signal(&(app->count_cond));
-//    pthread_mutex_unlock(&(app->count_mutex));
 
-//    std::cout << "CP Video Done! " << bufferSize <<std::endl;
+    if (buffer != NULL && bufferSize > 0) {
+      VideoAudio *va = &s_va;
+      App *app = &(va->v_app);
+      uint8_t* bufferTmp = new uint8_t[bufferSize];
+      memcpy (bufferTmp, buffer, bufferSize);
+
+      app->queue_m.lock();
+      app->dataQue.push_back(DataNode(bufferSize, (guint8 *)bufferTmp));
+      std::cout << "videoQueueSize " << (app->dataQue).size() <<std::endl;
+      app->queue_m.unlock();
+
+      t_video ++;
+    } else {
+      printf("h264_appsrc_data t_video:%d Terrible Happen\n", t_video);
+    }
   }
 
   void
   VideoPlayer::h264_appsrc_data_audio(const uint8_t* buffer, size_t bufferSize )
   {
-    VideoAudio *va = &s_va;
-    App *app = &(va->a_app);
-    DataNode dataNode;
-    uint8_t* bufferTmp = new uint8_t[bufferSize];
-    memcpy (bufferTmp, buffer, bufferSize);
-    dataNode.length = bufferSize;
-    dataNode.data = (guint8 *) bufferTmp;
-    (app->dataQue).push_back(dataNode);
-//    std::cout << "audioQueueSize " << (app->dataQue).size() <<std::endl;
-    t_audio ++;
-//    pthread_mutex_lock(&(app->count_mutex));
-//    if((app->dataQue).size() > 0)
-//       pthread_cond_signal(&(app->count_cond));
-//    pthread_mutex_unlock(&(app->count_mutex));
 
-//    std::cout << "CP Audio Done! " << bufferSize <<std::endl;
+    if (buffer != NULL && bufferSize > 0) {
+      VideoAudio *va = &s_va;
+      App *app = &(va->a_app);
+      uint8_t* bufferTmp = new uint8_t[bufferSize];
+      memcpy (bufferTmp, buffer, bufferSize);
+
+      app->queue_m.lock();
+      app->dataQue.push_back(DataNode(bufferSize, (guint8 *)bufferTmp));
+      std::cout << "audioQueueSize " << (app->dataQue).size() <<std::endl;
+      app->queue_m.unlock();
+
+      t_audio ++;
+    } else {
+      printf("h264_appsrc_data t_audio:%d Terrible Happen\n", t_audio);
+    }
   }
 
 /*
@@ -100,11 +119,13 @@ namespace ndn {
   VideoPlayer::h264_appsrc_init()
   {
     VideoAudio *va = &s_va;
-    pthread_t thread; 
-    int rc;
-//    rc = pthread_create(&thread, NULL, h264_capture_thread , (void *)va);
-    rc = pthread_create(&thread, NULL, h264_appsrc_thread ,(void *)va);
-    std::cout << "Pipeline Initialisation DONE! " << std::endl;
+//    pipeline_pool.schedule(boost::bind(&VideoPlayer::h264_appsrc_thread ,this, va));
+    pipe_thread = new boost::thread(boost::bind(&VideoPlayer::h264_appsrc_thread ,this, va));
+ 
+//    pthread_t thread; 
+//    int rc;
+//    rc = pthread_create(&thread, NULL, h264_appsrc_thread ,(void *)va);
+//    std::cout << "Pipeline Initialisation DONE! " << std::endl;
   }
 /* Call Consume Here From the start*/
   void

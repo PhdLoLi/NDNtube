@@ -18,6 +18,9 @@
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
 #include <ndn-cxx/contexts/consumer-context.hpp>
+#include "threadpool.hpp"
+
+using namespace boost::threadpool;
 
 namespace ndn {
 
@@ -26,6 +29,8 @@ namespace ndn {
     public:
 
       VideoPlayer();
+      ~VideoPlayer();
+
       void
       h264_appsrc_init ();
       void
@@ -39,12 +44,24 @@ namespace ndn {
       void
       consume_whole(Consumer *frameConsumer, Consumer *sampleConsumer);
 
+      int get_video_rate();
+      int get_audio_rate();
+
+      boost::condition_variable rate_con;
+      boost::mutex rate_mut;
+      bool rate_ready;
+      boost::thread *pipe_thread;
+//      pool pipeline_pool;
+
     private:
 
       struct DataNode
       {
         gsize length;
         guint8 *data;
+        DataNode(gsize len, guint8 *d) : length(len), data(d)
+        {
+        }
       };
 
       struct App
@@ -52,6 +69,7 @@ namespace ndn {
         GstElement *appsrc;
         guint sourceid;
 
+        boost::mutex queue_m;
         std::deque<DataNode> dataQue;
         std::string capstr;
         int rate;
@@ -77,12 +95,6 @@ namespace ndn {
       read_data (App * app)
       {
         GstFlowReturn ret;
-//        pthread_mutex_lock(&(app->count_mutex));
-//        while((app -> dataQue).size() == 0 )
-//        {
-//           pthread_cond_wait(&(app->count_cond), &(app->count_mutex));
-//        }
-//        pthread_mutex_unlock(&(app->count_mutex));
 
         if( (app -> dataQue).size() == 0  )
         {
@@ -92,22 +104,30 @@ namespace ndn {
           return TRUE; 
         }
         
+        app->queue_m.lock();   
 //        std::cout << "Readrate !" << app->rate << std::endl;
         DataNode tmpNode = (app -> dataQue).front();
         GstBuffer *buffer;
         
 //        buffer = gst_buffer_new_allocate (NULL, tmpNode.length, NULL);
 
-
 //        uint8_t* bufferTmp = new uint8_t[tmpNode.length];
 //        memcpy (bufferTmp, tmpNode.data, tmpNode.length);
 
-        buffer = gst_buffer_new();
-        buffer = gst_buffer_new_wrapped(tmpNode.data, tmpNode.length);
-        g_signal_emit_by_name(app->appsrc, "push-buffer", buffer, &ret);
-//  gst_buffer_unmap (buffer, &info);
-        gst_buffer_unref(buffer);
+        ret = GST_FLOW_OK; 
+        if (tmpNode.data != NULL) {
+          buffer = gst_buffer_new();
+          buffer = gst_buffer_new_wrapped(tmpNode.data, tmpNode.length);
+          g_signal_emit_by_name(app->appsrc, "push-buffer", buffer, &ret);
+//          gst_buffer_unref(buffer);
+        } else 
+        {
+          printf("Why this happened???\n");
+        }
+
         (app -> dataQue).pop_front();
+        
+        app->queue_m.unlock();
 
         if (ret != GST_FLOW_OK) {
           /* some error, stop sending data */
@@ -143,11 +163,11 @@ namespace ndn {
        * Lijig Wang
        * 2014/12/04 
        */
-      static void
-      *h264_appsrc_thread (void * threadData)
+      void
+      h264_appsrc_thread(VideoAudio *threadData)
       {
-        VideoAudio * va;
-        va = (VideoAudio *) threadData;
+//        std::cout << "First line " << std::endl;
+        VideoAudio *va = threadData;
 
         GstBus *bus;
         GMainLoop *loop;
@@ -231,7 +251,13 @@ namespace ndn {
         gst_object_unref (bus);
         /* play */
         gst_element_set_state (pipeline, GST_STATE_PLAYING);
-        std::cout << "start running" <<std::endl;
+            
+        rate_mut.lock();
+        rate_ready = true;
+        rate_con.notify_all();
+        rate_mut.unlock();
+
+        std::cout << "Gstreamer Pipeline Init OK!" <<std::endl;
 
         g_main_loop_run (loop);
         
@@ -241,7 +267,6 @@ namespace ndn {
         gst_object_unref (GST_OBJECT (pipeline));
         g_main_loop_unref (loop);
 
-        pthread_exit(NULL);
       }
       
       static void
@@ -373,9 +398,9 @@ namespace ndn {
             GError *err;
             gst_message_parse_error (msg, &err, &debug);
             g_printerr ("Debugging info: %s\n", (debug) ? debug : "none");
-            g_free (debug);
+//            g_free (debug);
             g_print ("Error: %s\n", err->message);
-            g_error_free (err);
+//            g_error_free (err);
 //            g_main_loop_quit (app->loop);
             break;
           }
@@ -390,6 +415,7 @@ namespace ndn {
         }
       return TRUE;
     }
+
 
   };
 } // namespace ndn

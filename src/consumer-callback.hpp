@@ -17,6 +17,15 @@
 namespace ndn {
 // Additional nested namespace could be used to prevent/limit name contentions
 
+  struct DataNode_G
+  {
+    uint64_t length;
+    uint8_t *data;
+    DataNode_G(uint64_t len, uint8_t *d) : length(len), data(d)
+    {
+    }
+  };
+
   class ConsumerCallback
   {
       
@@ -37,6 +46,22 @@ namespace ndn {
       payload_a += bufferSize;
       frame_cnt_a++;
       printf("Audio Frame: %d\n", frame_cnt_a);
+    }
+
+    void
+    wait_rate()
+    {
+      boost::unique_lock<boost::mutex> lock(player.rate_mut);
+      while(!player.rate_ready)
+      {
+//        std::cout << "waiting for rate" << std::endl;
+        player.rate_con.wait(lock);
+//        std::cout << "waiting for rate over" << std::endl;
+      }
+      frame_rate_v = player.get_video_rate() / 3;
+      frame_rate_a = player.get_audio_rate() / 3;
+      buffers_v.resize(frame_rate_v, DataNode_G(0, NULL));
+      buffers_a.resize(frame_rate_a, DataNode_G(0, NULL));
     }
 
     void
@@ -97,6 +122,13 @@ namespace ndn {
     boost::mutex mut_payload_a;
     bool data_ready_payload_a;
 
+    boost::mutex frame_cnt_v_m;
+    boost::mutex frame_cnt_a_m;
+    boost::mutex interest_s_m;
+    boost::mutex interest_r_m;
+    boost::mutex interest_retx_m;
+    boost::mutex interest_expr_m;
+
     int cur_frame_v;
     int cur_frame_a;
     int finalframe_video;
@@ -109,6 +141,11 @@ namespace ndn {
     gsize interest_r;
     gsize interest_retx;
     gsize interest_expr;
+    int frame_rate_v;
+    int frame_rate_a;
+
+    std::vector<DataNode_G> buffers_v;
+    std::vector<DataNode_G> buffers_a;
   };
 
 } // namespace ndn
