@@ -58,8 +58,8 @@ namespace ndn {
         player.rate_con.wait(lock);
 //        std::cout << "waiting for rate over" << std::endl;
       }
-      frame_rate_v = player.get_video_rate() / 3;
-      frame_rate_a = player.get_audio_rate() / 3;
+      frame_rate_v = player.get_video_rate() / 1;
+      frame_rate_a = player.get_audio_rate() / 1;
       buffers_v.resize(frame_rate_v, DataNode_G(0, NULL));
       buffers_a.resize(frame_rate_a, DataNode_G(0, NULL));
     }
