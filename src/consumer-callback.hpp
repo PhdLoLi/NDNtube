@@ -1,8 +1,8 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
-/*
+/**
  * Copyright (c) 2014 Regents of the University of California.
  *
- * @author Lijing Wang <phdloli@ucla.edu>
+ * @author Lijing Wang wanglj11@mails.tsinghua.edu.cn 
  */
 
 
