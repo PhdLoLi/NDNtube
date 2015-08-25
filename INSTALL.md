@@ -41,7 +41,7 @@ downlaod from http://gstreamer.freedesktop.org/data/pkg/osx/1.4.3/
 **Installation: please follow the order listed below. Only tested on the 1.4.3, use exactly this version.**
 * gstreamer-1.0-1.4.3-universal.pkg  --- the basic gstreamer lib
 * gstreamer-1.0-devel-1.4.3-universal.pkg  --- the develpoer gstreamer lib
-* gstreamer-1.0-1.4.3-universal-packages.dmg --- some useful plugins, please install all of them expect the last one
+* gstreamer-1.0-1.4.3-universal-packages.dmg --- some useful plugins, please install all of them except the last one
 
 **Config:**
 * Please add /Library/Frameworks/GStreamer.framework/Versions/1.0/lib/pkgconfig to your $PKG_CONFIG_PATH
