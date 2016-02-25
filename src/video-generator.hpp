@@ -17,7 +17,7 @@
 #include <vector>
 #include <gst/gst.h>
 #include "producer-callback.hpp"
-#include <ndn-cxx/contexts/producer-context.hpp>
+#include <Consumer-Producer-API/producer-context.hpp>
 
 
 namespace ndn {
