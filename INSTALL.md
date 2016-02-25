@@ -18,7 +18,7 @@ Prerequisites build instructions
 Mac OS build considerations
 -
 
-boost
+Boost
 --
 sudo port install boost
 
@@ -46,6 +46,35 @@ downlaod from http://gstreamer.freedesktop.org/data/pkg/osx/1.4.3/
 **Config:**
 * Please add /Library/Frameworks/GStreamer.framework/Versions/1.0/lib/pkgconfig to your $PKG_CONFIG_PATH
 * e.g. add "export PKG_CONFIG_PATH=/Library/Frameworks/GStreamer.framework/Versions/1.0/lib/pkgconfig:$PKG_CONFIG_PATH" to your .bashrc
+
+Ubuntu 10.04 build
+-
+
+Boost
+--
+```
+$ sudo apt-get install libboost-dev
+```
+
+Consumer Producer API
+--
+Follow guide on https://github.com/named-data/Consumer-Producer-API
+
+NFD
+--
+Follow guide on https://github.com/named-data/NFD
+
+repo-ng
+--
+Install from https://github.com/named-data/repo-ng
+The copy the repoo-ng.config into the NDN configuration directory
+
+GStreamer
+--
+```bash
+$ sudo apt-get install gstreamer1.0-dev libgstreamer-plugins-base1.0-dev\
+    gstreamer1.0-plugins-bad-videoparsers gstreamer1.0-plugins-good
+```
 
 Build instructions
 ==
