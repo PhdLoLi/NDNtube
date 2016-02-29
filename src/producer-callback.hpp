@@ -7,8 +7,8 @@
 
 #ifndef PRODUCER_CALLBACK_HPP
 #define PRODUCER_CALLBACK_HPP
-#include <ndn-cxx/contexts/producer-context.hpp>
-#include <ndn-cxx/contexts/application-nack.hpp>
+#include <Consumer-Producer-API/producer-context.hpp>
+#include <Consumer-Producer-API/application-nack.hpp>
 #include <boost/asio.hpp>
 
 namespace ndn {

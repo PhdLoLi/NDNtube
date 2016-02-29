@@ -97,7 +97,6 @@ namespace ndn {
                           (ConsumerContentCallback)bind(&ConsumerCallback::processPayloadAudio, con->cb, _1, _2, _3));
     }
         
-    con->sampleConsumer->setContextOption(MUST_BE_FRESH_S, true);
     con->sampleConsumer->setContextOption(INTEREST_LIFETIME, 500);
 
     con->sampleConsumer->setContextOption(INTEREST_RETX,16); //Retransmitted Attempted Time.
@@ -175,7 +174,6 @@ namespace ndn {
      
       Name videoinfoName(prefix);
       Consumer* videoinfoConsumer = new Consumer(videoinfoName.append(filename + "/video/streaminfo"), SDR);
-      videoinfoConsumer->setContextOption(MUST_BE_FRESH_S, true);
       videoinfoConsumer->setContextOption(INTEREST_LEAVE_CNTX, 
         (ConsumerInterestCallback)bind(&ConsumerCallback::processLeavingInterest, &cb_consumer, _1, _2));
       videoinfoConsumer->setContextOption(CONTENT_RETRIEVED, 
@@ -188,7 +186,6 @@ namespace ndn {
 
       Name audioinfoName(prefix);
       Consumer* audioinfoConsumer = new Consumer(audioinfoName.append(filename + "/audio/streaminfo"), SDR);
-      audioinfoConsumer->setContextOption(MUST_BE_FRESH_S, true);
       audioinfoConsumer->setContextOption(INTEREST_LEAVE_CNTX, 
         (ConsumerInterestCallback)bind(&ConsumerCallback::processLeavingInterest, &cb_consumer, _1, _2));
       audioinfoConsumer->setContextOption(CONTENT_RETRIEVED, 

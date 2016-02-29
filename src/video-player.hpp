@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
-#include <ndn-cxx/contexts/consumer-context.hpp>
+#include <Consumer-Producer-API/consumer-context.hpp>
 #include "threadpool.hpp"
 
 using namespace boost::threadpool;

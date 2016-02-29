@@ -23,9 +23,12 @@ def configure(conf):
     conf.check_cfg(package='gstreamer-app-1.0', args=['--cflags', '--libs'], 
          uselib_store='GSTREAMERAPP', mandatory=True) 
 
+    conf.check_cfg(package='Consumer-Producer-API', args=['--cflags', '--libs'],
+         uselib_store='CONSUMERPRODUCERAPI', mandatory=True)
+
     conf.env.LIB_PTHREAD = 'pthread'
 
-    USED_BOOST_LIBS = ['system', 'iostreams', 'filesystem', 'random']
+    USED_BOOST_LIBS = ['system', 'iostreams', 'filesystem', 'random', 'thread']
 
     conf.check_boost(lib=USED_BOOST_LIBS, mandatory=True)
 
@@ -38,19 +41,19 @@ def build(bld):
     bld(target="producer",
         features=["cxx", "cxxprogram"],
         source= "src/producer.cpp src/video-generator.cpp src/producer-callback.cpp",
-        use='GSTREAMER BOOST NDN_CXX PTHREAD',
+        use='GSTREAMER BOOST NDN_CXX PTHREAD CONSUMERPRODUCERAPI',
         )
 
     bld(target="repo_producer",
         features=["cxx", "cxxprogram"],
         source= "src/repo_producer.cpp src/video-generator.cpp src/producer-callback.cpp",
-        use='GSTREAMER BOOST NDN_CXX PTHREAD',
+        use='GSTREAMER BOOST NDN_CXX PTHREAD CONSUMERPRODUCERAPI',
         )
       
     bld(target="consumer",
         features=["cxx", "cxxprogram"],
         source= "src/consumer.cpp src/video-player.cpp src/consumer-callback.cpp",
-        use='GSTREAMER GSTREAMERAPP BOOST NDN_CXX PTHREAD',
+        use='GSTREAMER GSTREAMERAPP BOOST NDN_CXX PTHREAD CONSUMERPRODUCERAPI',
         )
 
     if bld.env['WITH_TESTS']:
